@@ -6,7 +6,7 @@
 **Description:**
 
 Key Protocol is a smart contract system that allows the NFT collection owners to assure their users by insuring their ERC721 tokens against ETH tokens.
-This assures users that the project is legitimate and the floor price of the collection will not drop to zero.
+This assures users that the project is legitimate and the floor price of the collection will not drop to zero. The ability to lock tokens to an NFT and require the NFT to be burned in order to claim those tokens creates a built-in mechanism for maintaining the floor price of the NFT. This could be particularly useful for NFTs associated with projects or platforms that have a high level of uncertainty or volatility.
 
 <h1>
   Contracts:
