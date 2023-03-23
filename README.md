@@ -1,4 +1,9 @@
-# KeyProtocol-SmartContracts
+<h1>
+  hey there
+  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="30px"/>
+</h1>
+
+**Description:**
 
 Key Protocol is a smart contract system that allows users to insure their ERC721 tokens and receive compensation in ETH in case of loss or theft of their tokens.
 
