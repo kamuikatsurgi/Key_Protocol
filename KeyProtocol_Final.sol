@@ -6,13 +6,15 @@ pragma solidity ^0.8.0;
 
 contract nftVault{
     
-    address public nft_contract_address;
+    address public nft_contract_address; 
+    uint256 nft_tokenID;
     uint256 min_time = 60 * 1 days;
     uint256 public creation_time;
     address public creator;
 
-    constructor(address _nft_contract_address){
+    constructor(address _nft_contract_address, uint256 _nft_tokenID){
         nft_contract_address = _nft_contract_address;
+        nft_tokenID = _nft_tokenID;
         creation_time = block.timestamp;
         creator = msg.sender;
     }
@@ -21,8 +23,10 @@ contract nftVault{
     receive() external payable{}
 
     function vault_claim(address payable recipient) external payable{
-        require(msg.sender == creator, "You can't call this function as it can only be called from KeyProtocol contract.");
-        require(block.timestamp - creation_time >= min_time, "You don't have patience, do you?");
+        
+        require(msg.sender == creator, "You can't call this function as it can only be called from KeyProtocol contract");
+        require(address(this).balance>=0, "Vault is empty");
+        require(block.timestamp - creation_time >= min_time, "The vault can only be accessed after two months from date of creation");
         uint amount = address(this).balance;
         (bool success, )  = recipient.call{value:amount}("");
         require(success,"Transaction Failed");
@@ -35,7 +39,7 @@ contract nftVault{
 
 contract KeyProtocol{
 
-    uint256 public i=0;
+    uint256 private i=0;
 
     nftVault[] public _nftvaults;
 
@@ -47,8 +51,8 @@ contract KeyProtocol{
 
     mapping (address=> uint) tracker;
 
-    function createVault(address nftcontract_addr) public{
-        nftVault vault = new nftVault(nftcontract_addr);
+    function createVault(address nftcontract_addr, uint256 _nft_tokenid) public{
+        nftVault vault = new nftVault(nftcontract_addr, _nft_tokenid);
         _nftvaults.push(vault);
         i++;
         emit VaultCreated(block.timestamp,address(vault),nftcontract_addr);
