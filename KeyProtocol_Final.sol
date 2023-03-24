@@ -25,7 +25,7 @@ contract nftVault{
     function vault_claim(address payable recipient) external payable{
         
         require(msg.sender == creator, "You can't call this function as it can only be called from KeyProtocol contract");
-        require(address(this).balance>=0, "Vault is empty");
+        require(address(this).balance > 0, "Vault is empty");
         require(block.timestamp - creation_time >= min_time, "The vault can only be accessed after two months from date of creation");
         uint amount = address(this).balance;
         (bool success, )  = recipient.call{value:amount}("");
