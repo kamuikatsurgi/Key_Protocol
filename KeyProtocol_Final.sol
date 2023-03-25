@@ -32,9 +32,6 @@ contract nftVault{
         require(success,"Transaction Failed");
     }
 
-    function getCreator() public view returns(address){
-        return creator;
-    }
 }
 
 contract KeyProtocol{
@@ -49,7 +46,7 @@ contract KeyProtocol{
         address nft_addr
     );
 
-    mapping(address=> uint) public tracker;
+    mapping(address=> uint) tracker;
 
     function createVault(address nftcontract_addr, uint256 _nft_tokenid) public{
         nftVault vault = new nftVault(nftcontract_addr, _nft_tokenid);
@@ -89,5 +86,11 @@ contract KeyProtocol{
         // burn the token
         tokenContract.burn(_tokenId);
         return true;
+    }
+
+    function getContractAddress(address mynftaddress) public view returns(nftVault){
+        uint256 nft_i = tracker[mynftaddress];
+        require(nft_i > 0 && nft_i <= _nftvaults.length, "NFT contract not found");
+        return _nftvaults[nft_i - 1];
     }
 }
