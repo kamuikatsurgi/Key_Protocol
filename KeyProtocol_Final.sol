@@ -7,10 +7,10 @@ pragma solidity ^0.8.0;
 contract nftVault{
     
     address public nft_contract_address; 
-    uint256 nft_tokenID;
+    uint256 public nft_tokenID;
     uint256 min_time = 60 * 1 days;
     uint256 public creation_time;
-    address public creator;
+    address creator;
 
     constructor(address _nft_contract_address, uint256 _nft_tokenID){
         nft_contract_address = _nft_contract_address;
@@ -49,7 +49,7 @@ contract KeyProtocol{
         address nft_addr
     );
 
-    mapping (address=> uint) tracker;
+    mapping(address=> uint) public tracker;
 
     function createVault(address nftcontract_addr, uint256 _nft_tokenid) public{
         nftVault vault = new nftVault(nftcontract_addr, _nft_tokenid);
