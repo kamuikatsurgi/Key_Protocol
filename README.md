@@ -44,5 +44,4 @@ To make a claim for compensation, call the claim function on the KeyProtocol con
 
 
 Deployed Contract Address: 0xcf0C32bD81AC60bD79E59f5559DaC88B11553b46
-
-[<kbd> <br> Explorer <br> </kbd>][https://blockscout.scroll.io/address/0xcf0C32bD81AC60bD79E59f5559DaC88B11553b46]
+Blockchain Explorer Link: https://blockscout.scroll.io/address/0xcf0C32bD81AC60bD79E59f5559DaC88B11553b46
