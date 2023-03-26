@@ -47,6 +47,7 @@ contract KeyProtocol{
     );
 
     mapping(address=> uint) tracker;
+    mapping(address=> mapping(uint256 => address)) _vaultAddress;
 
     function createVault(address nftcontract_addr, uint256 _nft_tokenid) public{
         nftVault vault = new nftVault(nftcontract_addr, _nft_tokenid);
@@ -54,6 +55,7 @@ contract KeyProtocol{
         i++;
         emit VaultCreated(block.timestamp,address(vault),nftcontract_addr);
         tracker[nftcontract_addr] = i;
+        _vaultAddress[nftcontract_addr][_nft_tokenid] = address(vault);
     }
 
     function deposit(address payable vault_contract_address) payable public{
@@ -88,9 +90,7 @@ contract KeyProtocol{
         return true;
     }
 
-    function getContractAddress(address mynftaddress) public view returns(nftVault){
-        uint256 nft_i = tracker[mynftaddress];
-        require(nft_i > 0 && nft_i <= _nftvaults.length, "NFT contract not found");
-        return _nftvaults[nft_i - 1];
+    function getContractAddress(address mynftaddress, uint256 mynft_tokenID) public view returns(address){
+        return _vaultAddress[mynftaddress][mynft_tokenID];
     }
 }
