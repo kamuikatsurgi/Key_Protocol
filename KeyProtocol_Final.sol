@@ -7,13 +7,13 @@ contract Vault{
 
     error NotAuthorized();
     error NotEnoughBalance();
-    error NotEnoughTime();
+    error NotEnoughTimePassed();
 
-    uint256 private minTime = 60 * 1 days;    
-    uint256 private initTime;
-    uint256 private tokenID;
-    address private parent;
-    address private nftContractAddress;
+    uint256 private constant minTime = 60 * 1 days;    
+    uint256 private immutable initTime;
+    uint256 private immutable tokenID;
+    address private immutable parent;
+    address private immutable nftContractAddress;
 
     constructor(address _nftContractAddress, uint256 _tokenID){
         initTime = block.timestamp;
@@ -25,8 +25,8 @@ contract Vault{
     function claim(address payable recipient) external payable{
         if(msg.sender!= parent) revert NotAuthorized();
         if(address(this).balance == 0) revert NotEnoughBalance();
-        if(block.timestamp - initTime < minTime) revert NotEnoughTime();
-        (bool success, ) = recipient.call{value : address(this).balance}("");
+        if(block.timestamp - initTime < minTime) revert NotEnoughTimePassed();
+        (bool success, ) = recipient.call{value: address(this).balance}("");
         require(success,"Transaction Failed");
     }
 
@@ -36,43 +36,46 @@ contract Vault{
 contract KeyProtocol{
 
     event VaultCreated(uint256 time, address nftContractAddress, address vaultAddress);
+    event Deposited(address vaultAddress, uint256 amount);
+    event Claimed(address nftContractAddress, uint256 tokenID, address recipient);
 
     Vault[] private vaults;
-    mapping(address => address) vaultToContract;
+    mapping(address => mapping(uint256 => address)) vaultToNFT;
 
     function createVault(address nftContractAddress, uint256 tokenID) external{
         Vault vault = new Vault(nftContractAddress, tokenID);
         vaults.push(vault);
-        vaultToContract[nftContractAddress] = address(vault);
+        vaultToNFT[nftContractAddress][tokenID] = address(vault);
         emit VaultCreated(block.timestamp, nftContractAddress, address(vault));
     }
 
     function deposit(address payable vaultAddress) external payable{
-        (bool success, )  = vaultAddress.call{ value : msg.value}("");
+        (bool success, )  = vaultAddress.call{value: msg.value}("");
         require(success,"Transaction Failed!");
+        emit Deposited(vaultAddress, msg.value);
     }
 
-    function claim(address nftContractAddress, 
-                   uint256 tokenID) external {
-        address insuree = returnOwnerAddress(nftContractAddress, tokenID);
-        require(insuree == msg.sender);
-        require(burnToken(nftContractAddress, tokenID));
-        address payable vaultAddress = payable(getVaultAddress(nftContractAddress));
+    function claim(address nftContractAddress, uint256 tokenID) external {
+        address owner = _returnOwnerAddress(nftContractAddress, tokenID);
+        require(owner == msg.sender);
+        require(_burnToken(nftContractAddress, tokenID));
+        address payable vaultAddress = payable(getVaultAddress(nftContractAddress, tokenID));
         address payable recipient = payable(msg.sender);
         Vault vault = Vault(vaultAddress);
         vault.claim(recipient);
+        emit Claimed(vaultAddress, tokenID, recipient);
     }
 
-    function getVaultAddress(address nftContractAddress) public view returns(address){
-        return vaultToContract[nftContractAddress];
+    function getVaultAddress(address nftContractAddress, uint256 tokenID) public view returns(address){
+        return vaultToNFT[nftContractAddress][tokenID];
     }
 
-    function returnOwnerAddress(address nftContractAddress, uint tokenID) internal view returns(address){
+    function _returnOwnerAddress(address nftContractAddress, uint tokenID) internal view returns(address){
         ERC721 token = ERC721(nftContractAddress);
         return token.ownerOf(tokenID);
     }
 
-    function burnToken(address nftContractAddress, uint256 tokenID) internal returns(bool){
+    function _burnToken(address nftContractAddress, uint256 tokenID) internal returns(bool){
         ERC721Burnable token = ERC721Burnable(nftContractAddress);
         require(token.getApproved(tokenID) == address(this), "Contract not approved to burn token");
         token.burn(tokenID);
